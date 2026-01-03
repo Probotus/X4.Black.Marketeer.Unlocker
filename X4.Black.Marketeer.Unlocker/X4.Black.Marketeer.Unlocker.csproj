@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+    <OutputType>Exe</OutputType>
+		<ApplicationIcon>Application.ico</ApplicationIcon>
+	</PropertyGroup>
+	<ItemGroup>
+		<Content Include="Application.ico" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "X4.Black.Marketeer.Unlocker": {
+      "commandName": "Project",
+      "commandLineArgs": "\"D:\\quicksave.xml.gz\""
+    }
+  }
+}
