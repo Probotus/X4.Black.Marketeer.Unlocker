@@ -28,17 +28,14 @@ internal sealed class Program
 	/// <returns>A task that represents the asynchronous operation.</returns>
 	private static async Task Main(string[] args)
 	{
-		CancellationTokenSource cts = new();
-		CancellationToken ct = cts.Token;
-
 		if (args.Length != 1)
 		{
 			Console.WriteLine("Usage: X4.Black.Marketeer.Unlocker <path to X4 save file>");
 			return;
 		}
 
-		string saveFilePath = args[0];
-		string backupPath = args[0] + ".bak";
+		string saveFilePath = $"{args[0]}";
+		string backupPath = $"{saveFilePath}.bak";
 
 		if (!File.Exists(saveFilePath))
 		{
@@ -47,14 +44,15 @@ internal sealed class Program
 		}
 
 		Console.WriteLine("Creating backup of the save file...");
+
 		File.Copy(saveFilePath, backupPath, true);
 
-		XElement savegame = await LoadSaveGameFile(saveFilePath, ct)
+		XElement savegame = await LoadSaveGameFile(saveFilePath)
 			.ConfigureAwait(false);
 
 		UnlockAllBlackMarketeers(savegame);
 
-		await SaveSaveGameFile(savegame, saveFilePath, ct)
+		await SaveSaveGameFile(savegame, saveFilePath)
 			.ConfigureAwait(false);
 	}
 
@@ -105,20 +103,20 @@ internal sealed class Program
 	/// </remarks>
 	/// <param name="savegame">The XML element containing the save game data to be written to the file.</param>
 	/// <param name="saveFilePath">The full file path where the compressed save game file will be created or overwritten.</param>
-	/// <param name="ct">A cancellation token that can be used to cancel the save operation.</param>
+	/// <param name="cancellationToken">A cancellation token that can be used to cancel the save operation.</param>
 	/// <returns>A task that represents the asynchronous save operation.</returns>
-	private static async Task SaveSaveGameFile(XElement savegame, string saveFilePath, CancellationToken ct)
+	private static async Task SaveSaveGameFile(XElement savegame, string saveFilePath, CancellationToken cancellationToken = default)
 	{
 		Console.WriteLine("Saving modified save file...");
 
 		using MemoryStream memoryStream = new();
 
-		await savegame.SaveAsync(memoryStream, SaveOptions.DisableFormatting, ct)
+		await savegame.SaveAsync(memoryStream, SaveOptions.DisableFormatting, cancellationToken)
 			.ConfigureAwait(false);
 
 		memoryStream.Position = 0;
 
-		await CompressToFileAsync(memoryStream, saveFilePath, ct)
+		await CompressToFileAsync(memoryStream, saveFilePath, cancellationToken)
 			.ConfigureAwait(false);
 
 		memoryStream.Close();
@@ -135,19 +133,19 @@ internal sealed class Program
 	/// a valid or supported save game file, an exception may be thrown during decompression or XML parsing.
 	/// </remarks>
 	/// <param name="saveFilePath">The full path to the save game file to load. The file must exist and be accessible.</param>
-	/// <param name="ct">A cancellation token that can be used to cancel the asynchronous operation.</param>
+	/// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
 	/// <returns>
 	/// A task that represents the asynchronous operation. The task result contains an <see cref="XElement"/>
 	/// representing the root element of the loaded save game file.
 	/// </returns>
-	private static async Task<XElement> LoadSaveGameFile(string saveFilePath, CancellationToken ct)
+	private static async Task<XElement> LoadSaveGameFile(string saveFilePath, CancellationToken cancellationToken = default)
 	{
 		Console.WriteLine("Loading save file...");
 
-		using MemoryStream decompressedStream = await DecompressFromFileAsync(saveFilePath, ct)
+		using MemoryStream decompressedStream = await DecompressFromFileAsync(saveFilePath, cancellationToken)
 			.ConfigureAwait(false);
 
-		XElement element = await XElement.LoadAsync(decompressedStream, LoadOptions.None, ct)
+		XElement element = await XElement.LoadAsync(decompressedStream, LoadOptions.None, cancellationToken)
 			.ConfigureAwait(false);
 
 		decompressedStream.Close();
@@ -170,7 +168,7 @@ internal sealed class Program
 	/// <returns>
 	/// A task that represents the asynchronous operation. The task result contains a <see cref="MemoryStream"/>.
 	/// </returns>
-	private static async Task<MemoryStream> DecompressFromFileAsync(string inputFile, CancellationToken cancellationToken)
+	private static async Task<MemoryStream> DecompressFromFileAsync(string inputFile, CancellationToken cancellationToken = default)
 	{
 		Console.WriteLine("Decompressing save file...");
 
@@ -210,7 +208,7 @@ internal sealed class Program
 	/// <param name="cancellationToken">A cancellation token that can be used to cancel the
 	/// asynchronous operation.</param>
 	/// <returns>A task that represents the asynchronous compression operation.</returns>
-	private static async Task CompressToFileAsync(Stream inputStream, string outputFile, CancellationToken cancellationToken)
+	private static async Task CompressToFileAsync(Stream inputStream, string outputFile, CancellationToken cancellationToken = default)
 	{
 		Console.WriteLine("Compressing save file...");
 
