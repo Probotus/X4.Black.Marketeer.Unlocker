@@ -1,7 +1,7 @@
 <Project>
 
 	<PropertyGroup>
-		<VersionStatus>Alpha</VersionStatus>
+		<VersionStatus>Beta</VersionStatus>
 		<VersionMajor>1</VersionMajor>
 		<VersionMinor>0</VersionMinor>
 		<VersionPatch>$([System.DateTime]::UtcNow.ToString("MMdd"))</VersionPatch>
